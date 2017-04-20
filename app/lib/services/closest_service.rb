@@ -24,7 +24,6 @@ class ClosestService
     @port = @position.port
     @opposite_type = SHIPPABLE_TYPES.find { |t| t != @position.shippable_type }
     @opposite_table = @opposite_type.pluralize.downcase
-    @opposite_klass = @opposite_type.constantize
   end
 
   def find
@@ -36,7 +35,7 @@ class ClosestService
   private
 
   def find_by_sql(days: 0)
-    subquery = select_by_haversine + join_tables + where_for_opened(DAYS_INTERVAL) + where_for_capacity
+    subquery = select_by_haversine + join_tables + where_for_opened(days) + where_for_capacity
     Position.find_by_sql ["SELECT * FROM (#{subquery}) AS dt WHERE dt.distance = dt.min_distance", data_for_sql]
   end
 
