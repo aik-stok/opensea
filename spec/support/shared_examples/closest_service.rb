@@ -6,6 +6,13 @@ shared_examples "closest_service" do |type|
 
     before { opponent.update(hold_capacity: send(type).hold_capacity * 0.9) }
 
+    context 'when position is not found' do
+      it do
+        get :closest, params: { id: 0 }
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
     context 'with results' do
       let!(:position_closest) { Fabricate(:position, shippable: opponent, port: Port.find_by_title("Benghazi") ) }
       let!(:position_far) { Fabricate(:position, shippable: opponent, port: Port.find_by_title("Hirao") ) }
@@ -25,6 +32,7 @@ shared_examples "closest_service" do |type|
 
           it do
             request
+            expect(response).to have_http_status(:success)
             expect(subject["message"]).to eq "Nothing suitable is not found"
           end
         end
@@ -56,6 +64,7 @@ shared_examples "closest_service" do |type|
     context 'when there is none position' do
       it 'returns empty array' do
         request
+        expect(response).to have_http_status(:success)
         expect(subject["message"]).to eq "Nothing suitable is not found"
       end
     end
